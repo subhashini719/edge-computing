@@ -1,0 +1,43 @@
+#include <iostream>
+#include "opencv2/opencv.hpp"
+
+int main() {
+    cv::VideoCapture cam(0);
+
+    if (!cam.isOpened()) {
+        throw std::runtime_error("Error");
+    }
+
+    cv::namedWindow("Window");
+    cv::Mat output(350,350,CV_8UC1);
+    cv::Mat rgb_output(350,350,CV_8UC3);
+    
+    while(true){
+        cv::Mat frame;
+        cam>>frame;
+        cv::resize(frame, frame,cv::Size(350,350));
+
+        cv::imshow("bgr_frame", frame);
+
+        cv::cvtColor(frame, output, CV_BGR2GRAY);
+        cv::imshow("opencv_func", output);
+
+        ImageOperator::to_gray_m1(frame,output);
+        cv::imshow("to_gray_m1",output);
+
+        ImageOperator::to_gray_m2(frame,output);
+        cv::imshow("to_gray_m2",output);
+
+        ImageOperator::to_gray_m3(frame,output);
+        cv::imshow("to_gray_m3",output);
+
+        ///No OpenCV
+        const unsigned char* bgr_input = (unsigned char*)frame.data;
+        unsigned char* gray_output = new unsigned char[frame.rows*frame.cols];
+        ImageOperator::to_gray(bgr_input,frame.cols,frame.rows,frame.channels(),gray_output);
+        cv::Mat output_gray(frame.rows, frame.cols, CV_8UC1, gray_output);
+        cv::imshow("to_gray_no_opencv", output_gray);
+        if(cv::waitKey(30) >= 0) break;
+    }
+    return 0;
+}
